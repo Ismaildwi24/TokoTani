@@ -7,6 +7,7 @@ import { BellIcon, ShoppingCartIcon, PlusIcon, MapPinIcon, PencilSquareIcon, Tra
 import { MapPinIcon as MapPinIconSolid } from '@heroicons/react/24/solid'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import MapPicker from './MapPicker'
 
 interface Address {
   id: string
@@ -17,6 +18,8 @@ interface Address {
   city: string
   province: string
   postalCode: string
+  latitude?: number | null
+  longitude?: number | null
   isDefault: boolean
 }
 
@@ -41,6 +44,8 @@ export default function AlamatClient({ initialAddresses, user }: { initialAddres
     city: '',
     province: '',
     postalCode: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
     isDefault: false
   })
 
@@ -53,6 +58,8 @@ export default function AlamatClient({ initialAddresses, user }: { initialAddres
       city: '',
       province: '',
       postalCode: '',
+      latitude: null,
+      longitude: null,
       isDefault: addresses.length === 0
     })
     setEditingId(null)
@@ -68,6 +75,8 @@ export default function AlamatClient({ initialAddresses, user }: { initialAddres
       city: addr.city,
       province: addr.province,
       postalCode: addr.postalCode,
+      latitude: addr.latitude || null,
+      longitude: addr.longitude || null,
       isDefault: addr.isDefault
     })
     setEditingId(addr.id)
@@ -312,6 +321,14 @@ export default function AlamatClient({ initialAddresses, user }: { initialAddres
                 onChange={e => setForm(f => ({ ...f, postalCode: e.target.value }))}
                 required
               />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Pilih Lokasi di Peta</label>
+                <MapPicker
+                  position={form.latitude && form.longitude ? { lat: form.latitude, lng: form.longitude } : null}
+                  onPositionChange={(pos) => setForm(f => ({ ...f, latitude: pos.lat, longitude: pos.lng }))}
+                />
+              </div>
 
               {!form.isDefault && (
                 <label className="flex items-center gap-2 cursor-pointer mt-2">

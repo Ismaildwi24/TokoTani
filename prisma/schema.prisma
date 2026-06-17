@@ -119,6 +119,8 @@ model Address {
   city          String
   province      String
   postalCode    String
+  latitude      Float?
+  longitude     Float?
   isDefault     Boolean @default(false)
   orders        Order[]
 }

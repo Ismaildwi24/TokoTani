@@ -9,7 +9,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { label, recipientName, phone, fullAddress, city, province, postalCode, isDefault } = body
+    const { label, recipientName, phone, fullAddress, city, province, postalCode, isDefault, latitude, longitude } = body
 
     // Jika set as default, ubah semua alamat lama jadi non-default
     if (isDefault) {
@@ -33,6 +33,8 @@ export async function POST(request: Request) {
         city,
         province,
         postalCode,
+        latitude,
+        longitude,
         isDefault: willBeDefault,
       },
     })
@@ -50,7 +52,7 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json()
-    const { id, label, recipientName, phone, fullAddress, city, province, postalCode, isDefault } = body
+    const { id, label, recipientName, phone, fullAddress, city, province, postalCode, isDefault, latitude, longitude } = body
 
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 })
 
@@ -77,6 +79,8 @@ export async function PATCH(request: Request) {
         city: city !== undefined ? city : undefined,
         province: province !== undefined ? province : undefined,
         postalCode: postalCode !== undefined ? postalCode : undefined,
+        latitude: latitude !== undefined ? latitude : undefined,
+        longitude: longitude !== undefined ? longitude : undefined,
         isDefault: isDefault !== undefined ? isDefault : undefined,
       },
     })
