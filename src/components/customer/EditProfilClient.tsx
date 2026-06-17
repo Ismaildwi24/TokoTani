@@ -105,6 +105,9 @@ export default function EditProfilClient({ user, returnPath }: EditProfilClientP
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
+        <Link href={returnPath || '/profil'} className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#006E2F] mb-6 transition-colors">
+          ← Kembali
+        </Link>
         <div className="bg-white rounded-2xl border border-[#E7E8EC] shadow-sm p-8">
           <h1 className="text-2xl font-extrabold text-gray-900 mb-6">Biodata Diri</h1>
 
