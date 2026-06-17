@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  PETANI
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING_VERIFICATION
+  SUSPENDED
+  REJECTED
+}
+
+enum Gender {
+  LAKI_LAKI
+  PEREMPUAN
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  phone     String?
+  fullName  String
+  gender    Gender?
+  avatarUrl String?
+  role      UserRole
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  petaniProfile           PetaniProfile?
+  addresses               Address[]
+  cart                    Cart?
+  ordersAsCustomer        Order[]             @relation("CustomerOrders")
+  reviews                 Review[]
+  notifications           Notification[]
+  reportsCreated          Report[]            @relation("ReporterUser")
+  conversationsAsCustomer ChatConversation[]  @relation("CustomerConversations")
+  chatMessages            ChatMessage[]
+  processedWithdrawals    WithdrawalRequest[] @relation("AdminProcessed")
+  verifiedPayments        Order[]             @relation("ManualVerifiedBy")
+}
+
+model PetaniProfile {
+  userId            String     @id
+  user              User       @relation(fields: [userId], references: [id])
+  farmName          String
+  location          String
+  bio               String?
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountHolder String?
+  verificationStatus UserStatus @default(PENDING_VERIFICATION)
+  verificationNote  String?
+
+  products              Product[]
+  ledgerEntries         PetaniLedger[]
+  withdrawalRequests    WithdrawalRequest[]
+  orderSellers          OrderSeller[]
+  conversationsAsPetani ChatConversation[] @relation("PetaniConversations")
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id              String         @id @default(uuid())
+  petaniId        String
+  petani          PetaniProfile  @relation(fields: [petaniId], references: [userId])
+  categoryId      String
+  category        Category       @relation(fields: [categoryId], references: [id])
+  name            String
+  description     String?
+  price           Decimal        @db.Decimal(12, 2)
+  unit            String
+  stock           Int            @default(0)
+  isOrganic       Boolean        @default(false)
+  isPesticideFree Boolean        @default(false)
+  isFeatured      Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  images          ProductImage[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+  cartItems       CartItem[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int     @default(0)
+}
+
+model Address {
+  id            String  @id @default(uuid())
+  userId        String
+  user          User    @relation(fields: [userId], references: [id])
+  label         String
+  recipientName String
+  phone         String
+  fullAddress   String
+  city          String
+  province      String
+  postalCode    String
+  isDefault     Boolean @default(false)
+  orders        Order[]
+}
+
+model Cart {
+  userId String     @id
+  user   User       @relation(fields: [userId], references: [id])
+  items  CartItem[]
+}
+
+model CartItem {
+  id        String  @id @default(uuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [userId])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  selected  Boolean @default(true)
+
+  @@unique([cartId, productId])
+}
+
+enum PaymentMethod {
+  MIDTRANS
+  MANUAL_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+model Order {
+  id                String   @id @default(uuid())
+  orderCode         String   @unique
+  customerId        String
+  customer          User     @relation("CustomerOrders", fields: [customerId], references: [id])
+  shippingAddressId String
+  shippingAddress   Address  @relation(fields: [shippingAddressId], references: [id])
+
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+
+  midtransOrderId       String? @unique
+  midtransTransactionId String?
+  midtransPaymentType   String?
+  midtransRawPayload    Json?
+
+  manualProofUrl        String?
+  manualVerifiedById    String?
+  manualVerifiedBy      User?     @relation("ManualVerifiedBy", fields: [manualVerifiedById], references: [id])
+  manualVerifiedAt      DateTime?
+  manualRejectionReason String?
+
+  subtotal          Decimal @db.Decimal(12, 2)
+  totalShippingCost Decimal @db.Decimal(12, 2) @default(0)
+  total             Decimal @db.Decimal(12, 2)
+
+  orderSellers OrderSeller[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+enum OrderSellerStatus {
+  MENUNGGU_PEMBAYARAN
+  DIPROSES
+  DIKIRIM
+  SELESAI
+  DIBATALKAN
+}
+
+model OrderSeller {
+  id             String            @id @default(uuid())
+  orderId        String
+  order          Order             @relation(fields: [orderId], references: [id])
+  petaniId       String
+  petani         PetaniProfile     @relation(fields: [petaniId], references: [userId])
+  status         OrderSellerStatus @default(MENUNGGU_PEMBAYARAN)
+  courierName    String?
+  courierEta     String?
+  shippingCost   Decimal           @db.Decimal(12, 2) @default(0)
+  trackingNumber String?
+  items          OrderItem[]
+  ledgerEntry    PetaniLedger?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model OrderItem {
+  id                  String      @id @default(uuid())
+  orderSellerId       String
+  orderSeller         OrderSeller @relation(fields: [orderSellerId], references: [id])
+  productId           String
+  product             Product     @relation(fields: [productId], references: [id])
+  productNameSnapshot String
+  priceSnapshot       Decimal     @db.Decimal(12, 2)
+  quantity            Int
+  subtotal            Decimal     @db.Decimal(12, 2)
+  review              Review?
+}
+
+enum LedgerType {
+  SALE_EARNING
+  COMMISSION_FEE
+  WITHDRAWAL
+  ADJUSTMENT
+}
+
+model PetaniLedger {
+  id            String             @id @default(uuid())
+  petaniId      String
+  petani        PetaniProfile      @relation(fields: [petaniId], references: [userId])
+  type          LedgerType
+  amount        Decimal            @db.Decimal(12, 2)
+  orderSellerId String?            @unique
+  orderSeller   OrderSeller?       @relation(fields: [orderSellerId], references: [id])
+  withdrawalId  String?
+  withdrawal    WithdrawalRequest? @relation(fields: [withdrawalId], references: [id])
+  note          String?
+  createdAt     DateTime           @default(now())
+}
+
+enum WithdrawalStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+model WithdrawalRequest {
+  id                  String           @id @default(uuid())
+  petaniId            String
+  petani              PetaniProfile    @relation(fields: [petaniId], references: [userId])
+  amount              Decimal          @db.Decimal(12, 2)
+  bankNameSnapshot    String
+  bankAccountSnapshot String
+  status              WithdrawalStatus @default(PENDING)
+  processedById       String?
+  processedBy         User?            @relation("AdminProcessed", fields: [processedById], references: [id])
+  processedAt         DateTime?
+  adminNote           String?
+  ledgerEntries       PetaniLedger[]
+  createdAt           DateTime         @default(now())
+}
+
+model Review {
+  id          String    @id @default(uuid())
+  orderItemId String    @unique
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  customerId  String
+  customer    User      @relation(fields: [customerId], references: [id])
+  rating      Int
+  comment     String?
+  photoUrl    String?
+  createdAt   DateTime  @default(now())
+}
+
+model ChatConversation {
+  id         String        @id @default(uuid())
+  customerId String
+  customer   User          @relation("CustomerConversations", fields: [customerId], references: [id])
+  petaniId   String
+  petani     PetaniProfile @relation("PetaniConversations", fields: [petaniId], references: [userId])
+  orderId    String?
+  messages   ChatMessage[]
+  createdAt  DateTime      @default(now())
+
+  @@unique([customerId, petaniId, orderId])
+}
+
+model ChatMessage {
+  id             String           @id @default(uuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User             @relation(fields: [senderId], references: [id])
+  content        String?
+  attachmentUrl  String?
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
+}
+
+enum NotificationType {
+  ORDER_UPDATE
+  CHAT_MESSAGE
+  PAYMENT_VERIFIED
+  PAYMENT_REJECTED
+  PETANI_VERIFIED
+  PETANI_REJECTED
+  WITHDRAWAL_PROCESSED
+  COMPLAINT_NEW
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  title     String
+  body      String
+  relatedId String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id         String       @id @default(uuid())
+  reporterId String
+  reporter   User         @relation("ReporterUser", fields: [reporterId], references: [id])
+  orderId    String?
+  reason     String
+  detail     String?
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+}
+
+model PlatformSetting {
+  key   String @id
+  value String
+}
