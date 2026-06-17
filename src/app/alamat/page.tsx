@@ -1,5 +1,6 @@
 import { requireAuth } from '@/lib/auth-guard'
 import { prisma } from '@/lib/prisma'
+import { UserRole } from '@prisma/client'
 import AlamatClient from '@/components/customer/AlamatClient'
 
 export const metadata = {
@@ -7,7 +8,7 @@ export const metadata = {
 }
 
 export default async function AlamatPage() {
-  const authUser = await requireAuth()
+  const authUser = await requireAuth([UserRole.CUSTOMER, UserRole.PETANI, UserRole.ADMIN])
 
   // Ambil profil user untuk fullName
   const user = await prisma.user.findUnique({
