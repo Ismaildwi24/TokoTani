@@ -40,6 +40,7 @@ model User {
 
   petaniProfile           PetaniProfile?
   addresses               Address[]
+  savedPaymentMethods     SavedPaymentMethod[]
   cart                    Cart?
   ordersAsCustomer        Order[]             @relation("CustomerOrders")
   reviews                 Review[]
@@ -123,6 +124,17 @@ model Address {
   longitude     Float?
   isDefault     Boolean @default(false)
   orders        Order[]
+}
+
+model SavedPaymentMethod {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerName  String   // e.g. "BCA", "Mandiri", "GoPay"
+  accountNumber String
+  accountHolder String
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
 }
 
 model Cart {
