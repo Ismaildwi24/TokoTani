@@ -35,6 +35,7 @@ export default function LoginPage() {
 
       if (data.user) {
         const role = data.user.user_metadata?.role
+        router.refresh()
         if (role === 'ADMIN') router.push('/admin')
         else if (role === 'PETANI') router.push('/mitra')
         else router.push('/')

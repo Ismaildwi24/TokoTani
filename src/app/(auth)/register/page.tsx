@@ -89,6 +89,7 @@ export default function RegisterPage() {
         }
       }
 
+      router.refresh()
       if (type === 'petani') {
         router.push('/register/petani/sukses')
       } else {
