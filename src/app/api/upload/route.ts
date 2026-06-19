@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -23,15 +23,14 @@ export async function POST(request: Request) {
   const ext = file.type === 'image/png' ? 'png' : 'jpg'
   const filename = `${user.id}-${Date.now()}.${ext}`
 
-  const supabaseAdmin = await createServiceClient()
   const buffer = Buffer.from(await file.arrayBuffer())
 
-  const { data, error } = await supabaseAdmin.storage
+  const { data, error } = await supabase.storage
     .from(bucket)
     .upload(filename, buffer, { upsert: true, contentType: file.type })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const { data: urlData } = supabaseAdmin.storage.from(bucket).getPublicUrl(filename)
+  const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filename)
   return NextResponse.json({ url: urlData.publicUrl })
 }
