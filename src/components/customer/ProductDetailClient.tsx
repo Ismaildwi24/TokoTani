@@ -164,6 +164,32 @@ export default function ProductDetailClient({ product, related, avgRating }: Pro
               </button>
             </div>
 
+            {/* Chat Petani */}
+            <div className="mt-4">
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/chat', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ partnerId: product.petani.userId })
+                    })
+                    if (res.ok) {
+                      router.push('/chat')
+                    } else {
+                      router.push('/login')
+                    }
+                  } catch (e) {
+                    console.error('Failed to start chat')
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 border-2 border-[#006E2F] text-[#006E2F] hover:bg-green-50 font-semibold rounded-full transition-colors active:scale-95"
+              >
+                <ChatBubbleOvalLeftIcon className="h-5 w-5" />
+                Tanya Petani
+              </button>
+            </div>
+
             {/* Stock indicator */}
             <p className="text-xs text-[#8F9093] mt-2">
               Stok tersedia: <span className="font-semibold text-gray-700">{product.stock} {product.unit}</span>
