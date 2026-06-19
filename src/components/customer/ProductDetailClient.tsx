@@ -47,6 +47,12 @@ export default function ProductDetailClient({ product, related, avgRating }: Pro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: product.id, quantity: qty }),
       })
+      
+      if (res.status === 401) {
+        window.location.href = '/login'
+        return
+      }
+
       if (res.ok) {
         setCartMsg('Berhasil ditambahkan ke keranjang!')
         setTimeout(() => setCartMsg(''), 3000)

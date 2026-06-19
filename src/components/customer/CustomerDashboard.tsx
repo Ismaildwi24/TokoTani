@@ -43,12 +43,27 @@ function ProductCard({ product }: { product: Product }) {
   const imgUrl = product.images[0]?.url || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80'
 
   async function addToCart() {
-    await fetch('/api/cart/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId: product.id, quantity: 1 }),
-    })
-    // Toast handled by global state / toast library
+    try {
+      const res = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id, quantity: 1 }),
+      })
+      
+      if (res.status === 401) {
+        window.location.href = '/login'
+        return
+      }
+
+      const data = await res.json()
+      if (res.ok) {
+        alert('Produk berhasil ditambahkan ke keranjang!')
+      } else {
+        alert(data.error || 'Gagal menambahkan ke keranjang')
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan')
+    }
   }
 
   return (
@@ -102,7 +117,10 @@ function ProductCard({ product }: { product: Product }) {
 
         <button
           id={`add-to-cart-${product.id}`}
-          onClick={addToCart}
+          onClick={(e) => {
+            e.preventDefault()
+            addToCart()
+          }}
           className="w-full py-2 bg-[#22C55E] hover:bg-[#16a34a] text-white text-sm font-semibold rounded-full transition-colors active:scale-95"
         >
           Beli
