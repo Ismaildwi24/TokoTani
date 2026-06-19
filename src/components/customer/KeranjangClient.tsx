@@ -103,7 +103,20 @@ export default function KeranjangClient({ items: initialItems }: { items: CartIt
         if (data.snapToken) {
           // Midtrans Snap
           // @ts-ignore
-          window.snap?.pay(data.snapToken)
+          window.snap?.pay(data.snapToken, {
+            onSuccess: function() {
+              router.push(`/pesanan/${data.orderId}`)
+            },
+            onPending: function() {
+              router.push(`/pesanan/${data.orderId}`)
+            },
+            onError: function() {
+              router.push(`/pesanan/${data.orderId}`)
+            },
+            onClose: function() {
+              router.push(`/pesanan/${data.orderId}`)
+            }
+          })
         } else {
           router.push(`/pesanan/${data.orderId}`)
         }

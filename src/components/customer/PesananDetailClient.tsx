@@ -36,7 +36,20 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
       const data = await res.json()
       if (res.ok && data.snapToken) {
         // @ts-ignore
-        window.snap?.pay(data.snapToken)
+        window.snap?.pay(data.snapToken, {
+          onSuccess: function() {
+            window.location.reload()
+          },
+          onPending: function() {
+            window.location.reload()
+          },
+          onError: function() {
+            window.location.reload()
+          },
+          onClose: function() {
+            // Do nothing, let user stay on this page
+          }
+        })
       } else {
         alert(data.error || 'Gagal memuat pembayaran Midtrans')
       }
