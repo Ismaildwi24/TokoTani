@@ -24,10 +24,11 @@ export async function POST(request: Request) {
   const filename = `${user.id}-${Date.now()}.${ext}`
 
   const supabaseAdmin = await createServiceClient()
+  const buffer = Buffer.from(await file.arrayBuffer())
 
   const { data, error } = await supabaseAdmin.storage
     .from(bucket)
-    .upload(filename, file, { upsert: true, contentType: file.type })
+    .upload(filename, buffer, { upsert: true, contentType: file.type })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
