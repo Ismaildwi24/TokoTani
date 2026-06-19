@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { PaymentMethod, PaymentStatus, OrderSellerStatus } from '@prisma/client'
+import { midtrans } from '@/lib/midtrans'
 
 // Generate kode order TT-XXXX
 function generateOrderCode() {
@@ -105,17 +106,39 @@ export async function POST(request: Request) {
   // Jika Midtrans, buat transaksi
   if (paymentMethod === 'MIDTRANS') {
     try {
-      const midtransRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/midtrans/charge`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: order.id }),
+      const itemDetails = cartItems.map(item => ({
+        id: item.product.name.slice(0, 50),
+        name: item.product.name,
+        price: parseFloat(item.product.price as unknown as string),
+        quantity: item.quantity,
+      }))
+
+      const midtransOrderId = `TT-${order.orderCode}-${Date.now()}`
+      
+      const snapToken = await midtrans.createTransaction({
+        transaction_details: {
+          order_id: midtransOrderId,
+          gross_amount: subtotal,
+        },
+        item_details: itemDetails,
+        customer_details: {
+          first_name: dbUser.fullName,
+          email: dbUser.email,
+          phone: dbUser.phone || '',
+        },
+      } as any)
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { midtransOrderId },
       })
-      const midtransData = await midtransRes.json()
+
       return NextResponse.json({
         orderId: order.id,
-        snapToken: midtransData.snapToken,
+        snapToken: snapToken.token,
       })
-    } catch {
+    } catch (error: any) {
+      console.error('Midtrans Checkout Error:', error)
       // fallback — return orderId tetap
     }
   }
