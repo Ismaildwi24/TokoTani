@@ -23,6 +23,13 @@ export default async function MitraDashboardPage() {
     where: { userId: user.id },
     include: {
       ledgerEntries: { select: { amount: true } },
+      products: {
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+        include: {
+          images: { take: 1, orderBy: { sortOrder: 'asc' } }
+        }
+      },
       orderSellers: {
         where: { status: { in: ['DIPROSES', 'MENUNGGU_PEMBAYARAN'] } },
         include: {
@@ -136,6 +143,52 @@ export default async function MitraDashboardPage() {
             </div>
             <span>Tarik Dana→</span>
           </Link>
+        </div>
+
+        {/* My Products */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-extrabold text-gray-900">Produk Saya (Terbaru)</h2>
+            <Link
+              href="/mitra/produk/baru"
+              className="text-sm font-semibold text-[#006E2F] hover:underline"
+            >
+              Upload Lainnya →
+            </Link>
+          </div>
+
+          {!petani?.products || petani.products.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-[#E7E8EC] p-10 text-center text-[#8F9093]">
+              Belum ada produk yang di-upload.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {petani.products.map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-white rounded-2xl border border-[#E7E8EC] overflow-hidden hover:shadow-md transition-all group"
+                >
+                  <div className="h-32 overflow-hidden bg-gray-50 relative">
+                    <img
+                      src={p.images[0]?.url || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80'}
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                    {!p.isActive && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md">Nonaktif</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-xs text-[#8F9093] mb-0.5">Stok: {p.stock} {p.unit}</p>
+                    <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 mb-1">{p.name}</h3>
+                    <p className="text-[#22C55E] font-bold text-sm">{formatRupiah(parseFloat(p.price as any))}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Active Orders */}
