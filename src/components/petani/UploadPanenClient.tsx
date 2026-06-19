@@ -66,7 +66,11 @@ export default function UploadPanenClient({ categories }: UploadPanenClientProps
         fd.append('bucket', 'product-images')
         const res = await fetch('/api/upload', { method: 'POST', body: fd })
         const data = await res.json()
-        if (res.ok) photoUrls.push(data.url)
+        if (res.ok) {
+          photoUrls.push(data.url)
+        } else {
+          throw new Error(data.error || 'Gagal upload foto')
+        }
       }
 
       // Create product
@@ -87,8 +91,8 @@ export default function UploadPanenClient({ categories }: UploadPanenClientProps
         const data = await res.json()
         setError(data.error || 'Gagal upload produk.')
       }
-    } catch {
-      setError('Terjadi kesalahan.')
+    } catch (err: any) {
+      setError(err.message || 'Terjadi kesalahan.')
     } finally {
       setLoading(false)
     }
