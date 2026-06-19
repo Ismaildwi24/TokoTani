@@ -65,18 +65,22 @@ export default function AdminOperasionalClient({ pendingOrders: initialOrders, u
     }
   }
 
-  async function updateUserStatus(userId: string, action: 'suspend' | 'block' | 'activate') {
+  async function updateUserStatus(userId: string, action: 'suspend' | 'block' | 'activate' | 'verifyPetani') {
     await fetch(`/api/admin/user/${userId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action }),
     })
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId
-          ? { ...u, status: action === 'activate' ? 'ACTIVE' : action === 'suspend' ? 'SUSPENDED' : 'REJECTED' }
-          : u
-      )
+      prev.map((u) => {
+        if (u.id !== userId) return u
+        const newStatus = action === 'activate' || action === 'verifyPetani' ? 'ACTIVE' : action === 'suspend' ? 'SUSPENDED' : 'REJECTED'
+        return {
+          ...u,
+          status: newStatus,
+          petaniProfile: u.petaniProfile ? { ...u.petaniProfile, verificationStatus: action === 'verifyPetani' ? 'ACTIVE' : u.petaniProfile.verificationStatus } : null
+        }
+      })
     )
   }
 
@@ -322,10 +326,20 @@ export default function AdminOperasionalClient({ pendingOrders: initialOrders, u
                         }`}
                       >
                         {statusLabel[u.status] || u.status}
+                        {u.role === 'PETANI' && u.petaniProfile?.verificationStatus === 'PENDING_VERIFICATION' && ' (Menunggu Verifikasi)'}
                       </span>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex gap-2 justify-end">
+                        {u.role === 'PETANI' && u.petaniProfile?.verificationStatus === 'PENDING_VERIFICATION' && (
+                          <button
+                            id={`verifikasi-${u.id}`}
+                            onClick={() => updateUserStatus(u.id, 'verifyPetani')}
+                            className="px-3 py-1.5 bg-[#006E2F] hover:bg-[#005525] text-white text-xs font-semibold rounded-lg transition-colors"
+                          >
+                            Verifikasi
+                          </button>
+                        )}
                         <button
                           id={`tangguhkan-${u.id}`}
                           onClick={() => updateUserStatus(u.id, u.status === 'SUSPENDED' ? 'activate' : 'suspend')}

@@ -20,6 +20,7 @@ export async function PATCH(
     suspend: 'SUSPENDED',
     block: 'REJECTED',
     activate: 'ACTIVE',
+    verifyPetani: 'ACTIVE',
   }
 
   const newStatus = statusMap[action]
@@ -29,6 +30,13 @@ export async function PATCH(
     where: { id },
     data: { status: newStatus as any },
   })
+
+  if (action === 'verifyPetani') {
+    await prisma.petaniProfile.update({
+      where: { userId: id },
+      data: { verificationStatus: 'ACTIVE' }
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }
