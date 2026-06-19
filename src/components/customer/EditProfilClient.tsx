@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { BellIcon, ShoppingCartIcon, CameraIcon } from '@heroicons/react/24/outline'
+import { ArrowRightOnRectangleIcon, BellIcon, ShoppingCartIcon, CameraIcon } from '@heroicons/react/24/outline'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
@@ -105,9 +105,23 @@ export default function EditProfilClient({ user, returnPath }: EditProfilClientP
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <Link href={returnPath || '/profil'} className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#006E2F] mb-6 transition-colors">
-          ← Kembali
-        </Link>
+        <div className="flex justify-between items-center mb-6">
+          <Link href={returnPath || '/profil'} className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#006E2F] transition-colors">
+            ← Kembali
+          </Link>
+          <button
+            onClick={async () => {
+              const { createClient } = await import('@/lib/supabase/client')
+              const supabase = createClient()
+              await supabase.auth.signOut()
+              window.location.href = '/login'
+            }}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-600 transition-colors"
+          >
+            <ArrowRightOnRectangleIcon className="h-4 w-4" />
+            Keluar Akun
+          </button>
+        </div>
         <div className="bg-white rounded-2xl border border-[#E7E8EC] shadow-sm p-8">
           <h1 className="text-2xl font-extrabold text-gray-900 mb-6">Biodata Diri</h1>
 
