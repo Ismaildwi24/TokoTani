@@ -107,9 +107,11 @@ export default function KeranjangClient({ items: initialItems }: { items: CartIt
         } else {
           router.push(`/pesanan/${data.orderId}`)
         }
+      } else {
+        alert(data.error || 'Terjadi kesalahan saat membuat pesanan.')
       }
     } catch {
-      // handle error
+      alert('Terjadi kesalahan jaringan.')
     } finally {
       setCheckingOut(false)
     }
