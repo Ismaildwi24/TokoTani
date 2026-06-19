@@ -150,10 +150,10 @@ export default async function MitraDashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-extrabold text-gray-900">Produk Saya (Terbaru)</h2>
             <Link
-              href="/mitra/produk/baru"
+              href="/mitra/produk"
               className="text-sm font-semibold text-[#006E2F] hover:underline"
             >
-              Upload Lainnya →
+              Kelola Produk →
             </Link>
           </div>
 
