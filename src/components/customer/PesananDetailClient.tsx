@@ -17,13 +17,38 @@ function formatRupiah(amount: number | string) {
 export default function PesananDetailClient({ order }: OrderDetailProps) {
   const [copied, setCopied] = useState(false)
 
+  const [loadingPayment, setLoadingPayment] = useState(false)
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText('1234567890')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleMidtransPayment = async () => {
+    setLoadingPayment(true)
+    try {
+      const res = await fetch('/api/midtrans/charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id }),
+      })
+      const data = await res.json()
+      if (res.ok && data.snapToken) {
+        // @ts-ignore
+        window.snap?.pay(data.snapToken)
+      } else {
+        alert(data.error || 'Gagal memuat pembayaran Midtrans')
+      }
+    } catch {
+      alert('Terjadi kesalahan jaringan saat memanggil payment gateway.')
+    } finally {
+      setLoadingPayment(false)
+    }
+  }
+
   const isPendingManual = order.paymentStatus === 'PENDING' && order.paymentMethod === 'MANUAL_TRANSFER'
+  const isPendingMidtrans = order.paymentStatus === 'PENDING' && order.paymentMethod === 'MIDTRANS'
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -95,6 +120,35 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                   className="w-full sm:w-auto px-8 py-3 bg-[#006E2F] text-white font-bold rounded-full hover:bg-[#005525] transition-colors active:scale-95 shadow-md"
                 >
                   Saya Sudah Transfer
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Instruksi Midtrans */}
+          {isPendingMidtrans && (
+            <div className="bg-white rounded-2xl border-2 border-orange-200 shadow-sm p-6 overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-2 bg-orange-400" />
+              <h2 className="text-lg font-extrabold text-gray-900 mb-2">Selesaikan Pembayaran Anda</h2>
+              <p className="text-sm text-gray-600 mb-6">Silakan klik tombol di bawah ini untuk melanjutkan pembayaran via Payment Gateway (QRIS, GoPay, Virtual Account, dll).</p>
+              
+              <div className="flex flex-col md:flex-row items-center justify-between bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6 gap-4">
+                <div className="text-center md:text-left">
+                  <p className="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wider">Total Tagihan</p>
+                  <p className="text-3xl font-extrabold text-[#006E2F]">{formatRupiah(order.total)}</p>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <button 
+                  onClick={handleMidtransPayment}
+                  disabled={loadingPayment}
+                  className="w-full sm:w-auto px-8 py-3 bg-[#006E2F] text-white font-bold rounded-full hover:bg-[#005525] transition-colors active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto gap-2"
+                >
+                  {loadingPayment ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : null}
+                  {loadingPayment ? 'Memuat...' : 'Bayar via Midtrans'}
                 </button>
               </div>
             </div>

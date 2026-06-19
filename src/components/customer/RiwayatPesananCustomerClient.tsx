@@ -142,6 +142,14 @@ export default function RiwayatPesananCustomerClient({ orders }: RiwayatPesananC
                     <p className="font-extrabold text-[#006E2F] text-lg">{formatRupiah(order.totalSeller)}</p>
                   </div>
                   <div className="flex items-center gap-2">
+                    {order.status === 'MENUNGGU_PEMBAYARAN' && (
+                      <Link
+                        href={`/pesanan/${order.orderId}`}
+                        className="px-4 py-2 bg-orange-100 text-orange-700 hover:bg-orange-200 rounded-xl text-sm font-bold transition-colors"
+                      >
+                        Bayar Sekarang
+                      </Link>
+                    )}
                     {order.status === 'SELESAI' && (
                       <Link
                         href={`/pesanan/${order.orderId}`}
@@ -150,9 +158,14 @@ export default function RiwayatPesananCustomerClient({ orders }: RiwayatPesananC
                         <StarIcon className="w-4 h-4" /> Beri Ulasan
                       </Link>
                     )}
-                    {/* The detail link points to order tracking/detail page which may not exist yet, 
-                        so we just link to a generic /pesanan/[id] or similar if it existed, 
-                        or we can just show order detail in a modal/expandable, but for now linking is fine */}
+                    {order.status !== 'MENUNGGU_PEMBAYARAN' && order.status !== 'SELESAI' && (
+                      <Link
+                        href={`/pesanan/${order.orderId}`}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-sm font-bold transition-colors"
+                      >
+                        Lihat Detail
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
