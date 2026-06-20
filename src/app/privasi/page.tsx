@@ -1,19 +1,23 @@
 import Link from 'next/link'
 import { ArrowLeftIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { getAuthUser } from '@/lib/auth-guard'
 
 export const metadata = {
   title: 'Kebijakan Privasi | Toko Tani',
   description: 'Kebijakan privasi dan perlindungan data pengguna Toko Tani',
 }
 
-export default function PrivasiPage() {
+export default async function PrivasiPage() {
+  const user = await getAuthUser()
+  const homeUrl = user?.role === 'PETANI' ? '/mitra' : user?.role === 'ADMIN' ? '/admin' : '/'
+
   return (
     <div className="min-h-screen bg-[#F8F9FF] pb-12">
       {/* Header */}
       <header className="bg-white border-b border-[#E7E8EC] sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="text-lg font-extrabold text-[#006E2F]">Toko Tani</Link>
-          <Link href="/" className="text-sm font-medium text-gray-500 hover:text-[#006E2F] flex items-center gap-1">
+          <Link href={homeUrl} className="text-lg font-extrabold text-[#006E2F]">Toko Tani</Link>
+          <Link href={homeUrl} className="text-sm font-medium text-gray-500 hover:text-[#006E2F] flex items-center gap-1">
             <ArrowLeftIcon className="h-4 w-4" />
             Kembali
           </Link>
