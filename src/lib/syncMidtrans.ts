@@ -76,13 +76,11 @@ export async function syncOrderPaymentStatus(orderId: string) {
             0
           )
           const commission = sellerTotal * (commPct / 100)
-          const netEarning = sellerTotal - commission
-
           await tx.petaniLedger.create({
             data: {
               petaniId: seller.petaniId,
               type: 'SALE_EARNING',
-              amount: netEarning,
+              amount: sellerTotal,
               orderSellerId: seller.id,
               note: `Penjualan order #${order.orderCode}`,
             },
@@ -93,7 +91,6 @@ export async function syncOrderPaymentStatus(orderId: string) {
               petaniId: seller.petaniId,
               type: 'COMMISSION_FEE',
               amount: -commission,
-              orderSellerId: seller.id,
               note: `Komisi platform ${commPct}% untuk order #${order.orderCode}`,
             },
           })

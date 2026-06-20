@@ -56,7 +56,7 @@ export async function POST(
           data: {
             petaniId: seller.petaniId,
             type: 'SALE_EARNING',
-            amount: total - commission,
+            amount: total,
             orderSellerId: seller.id,
             note: `Penjualan (manual terverifikasi) order #${order.orderCode}`,
           },
@@ -66,7 +66,6 @@ export async function POST(
             petaniId: seller.petaniId,
             type: 'COMMISSION_FEE',
             amount: -commission,
-            orderSellerId: seller.id,
             note: `Komisi ${commPct}% order #${order.orderCode}`,
           },
         })
