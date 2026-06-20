@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 import { ChevronRightIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
 import { TrophyIcon } from '@heroicons/react/24/solid'
 
@@ -57,12 +58,12 @@ function ProductCard({ product }: { product: Product }) {
 
       const data = await res.json()
       if (res.ok) {
-        alert('Produk berhasil ditambahkan ke keranjang!')
+        toast.success('Produk berhasil ditambahkan ke keranjang!')
       } else {
-        alert(data.error || 'Gagal menambahkan ke keranjang')
+        toast.error(data.error || 'Gagal menambahkan ke keranjang')
       }
     } catch (err) {
-      alert('Terjadi kesalahan')
+      toast.error('Terjadi kesalahan')
     }
   }
 

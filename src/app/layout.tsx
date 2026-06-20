@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
+import ToastProvider from '@/components/ui/ToastProvider';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className="antialiased">
+        <ToastProvider />
         {children}
         <script 
           type="text/javascript"
