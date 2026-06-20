@@ -61,6 +61,16 @@ export default async function MitraDashboardPage() {
 
   const isVerified = petani?.verificationStatus === 'ACTIVE'
 
+  const unreadChatCount = await prisma.chatMessage.count({
+    where: {
+      conversation: {
+        petaniId: user.id
+      },
+      senderId: { not: user.id },
+      readAt: null
+    }
+  })
+
   return (
     <div className="min-h-screen bg-[#F8F9FF]">
       {/* Header */}
@@ -83,11 +93,11 @@ export default async function MitraDashboardPage() {
           <div className="flex items-center gap-3">
             <Link href="/mitra/chat" className="relative p-2 text-gray-500 hover:text-[#006E2F] rounded-full hover:bg-[#E6EEFF] transition-all">
               <ChatBubbleOvalLeftEllipsisIcon className="h-5 w-5" />
-              <span className="absolute top-0.5 right-0.5 h-2 w-2 bg-red-500 rounded-full" />
-            </Link>
-            <Link href="/mitra/notifikasi" className="relative p-2 text-gray-500 hover:text-[#006E2F] rounded-full hover:bg-[#E6EEFF] transition-all">
-              <BellIcon className="h-5 w-5" />
-              <span className="absolute top-0.5 right-0.5 h-2 w-2 bg-red-500 rounded-full" />
+              {unreadChatCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white">
+                  {unreadChatCount > 99 ? '99+' : unreadChatCount}
+                </span>
+              )}
             </Link>
             <Link href="/mitra/profil/edit" className="flex-shrink-0">
               <div className="h-9 w-9 rounded-full bg-[#006E2F] flex items-center justify-center text-white text-sm font-semibold overflow-hidden">
