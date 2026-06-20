@@ -101,7 +101,12 @@ export default function EditProfilClient({ user, returnPath, petaniProfile }: Ed
       {/* Simple header */}
       <header className="bg-white border-b border-[#E7E8EC] sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="text-lg font-extrabold text-[#006E2F]">Toko Tani</Link>
+          <Link href={returnPath || '/'} className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-[#006E2F]">
+              <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd" />
+            </svg>
+            <span className="text-lg font-extrabold text-[#006E2F]">Toko Tani</span>
+          </Link>
           <div className="flex items-center gap-3">
             <BellIcon className="h-5 w-5 text-gray-500 hover:text-[#006E2F] cursor-pointer" />
             <ShoppingCartIcon className="h-5 w-5 text-gray-500 hover:text-[#006E2F] cursor-pointer" />
