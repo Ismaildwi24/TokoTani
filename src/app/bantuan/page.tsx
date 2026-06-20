@@ -107,6 +107,10 @@ export default function BantuanPage() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <Link href="/bantuan/laporan" className="flex items-center justify-center gap-2 bg-white text-[#006E2F] border border-[#006E2F] px-6 py-3 rounded-xl font-bold hover:bg-[#E6EEFF] transition-colors">
+              <ChatBubbleLeftRightIcon className="h-5 w-5" />
+              Buat Laporan / Keluhan
+            </Link>
             <a href="https://wa.me/6281234567890" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#20bd5a] transition-colors">
               <PhoneIcon className="h-5 w-5" />
               WhatsApp

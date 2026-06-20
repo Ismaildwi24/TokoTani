@@ -6,7 +6,7 @@ import AdminOperasionalClient from '@/components/admin/AdminOperasionalClient'
 export default async function AdminOperasionalPage() {
   await requireAuth([UserRole.ADMIN])
 
-  const [pendingOrders, users] = await Promise.all([
+  const [pendingOrders, users, reports] = await Promise.all([
     // Manual transfer orders pending verification
     prisma.order.findMany({
       where: {
@@ -30,12 +30,20 @@ export default async function AdminOperasionalPage() {
       orderBy: { createdAt: 'desc' },
       take: 20,
     }),
+    // Open reports
+    prisma.report.findMany({
+      where: { status: 'OPEN' },
+      include: { reporter: { select: { fullName: true, email: true } } },
+      orderBy: { createdAt: 'asc' },
+      take: 20,
+    }),
   ])
 
   return (
     <AdminOperasionalClient
       pendingOrders={pendingOrders as any}
       users={users as any}
+      reports={reports as any}
     />
   )
 }

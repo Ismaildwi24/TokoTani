@@ -28,15 +28,26 @@ interface UserData {
   petaniProfile: { verificationStatus: string } | null
 }
 
+interface ReportData {
+  id: string
+  reason: string
+  detail: string | null
+  orderId: string | null
+  createdAt: Date
+  reporter: { fullName: string; email: string }
+}
+
 interface Props {
   pendingOrders: PendingOrder[]
   users: UserData[]
+  reports: ReportData[]
 }
 
-export default function AdminOperasionalClient({ pendingOrders: initialOrders, users: initialUsers }: Props) {
-  const [activeTab, setActiveTab] = useState<'payment' | 'users'>('payment')
+export default function AdminOperasionalClient({ pendingOrders: initialOrders, users: initialUsers, reports: initialReports }: Props) {
+  const [activeTab, setActiveTab] = useState<'payment' | 'users' | 'complaints'>('payment')
   const [orders, setOrders] = useState(initialOrders)
   const [users, setUsers] = useState(initialUsers)
+  const [reports, setReports] = useState(initialReports)
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('semua')
   const [processingId, setProcessingId] = useState<string | null>(null)
@@ -59,6 +70,22 @@ export default function AdminOperasionalClient({ pendingOrders: initialOrders, u
       })
       if (res.ok) {
         setOrders((prev) => prev.filter((o) => o.id !== orderId))
+      }
+    } finally {
+      setProcessingId(null)
+    }
+  }
+
+  async function resolveReport(reportId: string, status: 'RESOLVED' | 'DISMISSED') {
+    setProcessingId(reportId)
+    try {
+      const res = await fetch(`/api/admin/report/${reportId}/resolve`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (res.ok) {
+        setReports((prev) => prev.filter((r) => r.id !== reportId))
       }
     } finally {
       setProcessingId(null)
@@ -167,6 +194,16 @@ export default function AdminOperasionalClient({ pendingOrders: initialOrders, u
             }`}
           >
             Manajemen Pengguna
+          </button>
+          <button
+            onClick={() => setActiveTab('complaints')}
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+              activeTab === 'complaints'
+                ? 'bg-[#006E2F] text-white shadow-sm'
+                : 'bg-white border border-[#E7E8EC] text-gray-600 hover:border-[#22C55E]'
+            }`}
+          >
+            Keluhan Konsumen
           </button>
         </div>
 
@@ -384,6 +421,65 @@ export default function AdminOperasionalClient({ pendingOrders: initialOrders, u
                 </tr>
               </tfoot>
             </table>
+          </div>
+        )}
+        {/* Complaints Tab */}
+        {activeTab === 'complaints' && (
+          <div className="bg-white rounded-2xl border border-[#E7E8EC] shadow-sm overflow-hidden">
+            {reports.length === 0 ? (
+              <div className="py-12 text-center text-[#8F9093]">
+                Tidak ada keluhan konsumen yang aktif.
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[#E7E8EC] text-xs text-[#8F9093] uppercase tracking-wide bg-[#F8F9FF]">
+                    <th className="text-left px-5 py-3">Tanggal</th>
+                    <th className="text-left px-5 py-3">Konsumen</th>
+                    <th className="text-left px-5 py-3">Kategori Masalah</th>
+                    <th className="text-left px-5 py-3 w-1/3">Detail Keluhan</th>
+                    <th className="text-right px-5 py-3">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E7E8EC]">
+                  {reports.map((report) => (
+                    <tr key={report.id} className="hover:bg-[#F8F9FF] transition-colors">
+                      <td className="px-5 py-4 text-xs text-gray-500 whitespace-nowrap">
+                        {new Date(report.createdAt).toLocaleDateString('id-ID')}
+                        <br />
+                        {new Date(report.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="text-sm font-semibold text-gray-900">{report.reporter.fullName}</p>
+                        <p className="text-xs text-gray-500">{report.reporter.email}</p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="inline-flex px-2 py-1 bg-red-50 text-red-700 text-xs font-semibold rounded-lg">
+                          {report.reason}
+                        </span>
+                        {report.orderId && (
+                          <p className="text-xs text-gray-500 mt-1">Order: {report.orderId}</p>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="text-sm text-gray-700">{report.detail}</p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={() => resolveReport(report.id, 'RESOLVED')}
+                            disabled={processingId === report.id}
+                            className="px-4 py-1.5 bg-[#22C55E] hover:bg-green-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+                          >
+                            Tandai Selesai
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
       </div>
