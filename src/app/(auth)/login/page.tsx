@@ -53,7 +53,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-[#E7E8EC] px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl font-extrabold text-[#006E2F]">
+        <Link href="/" className="flex items-center gap-2 text-xl font-extrabold text-[#006E2F]">
+          <img src="/logo.png" alt="Logo Toko Tani" className="h-8 w-auto object-contain" />
           Toko Tani
         </Link>
         <Link
