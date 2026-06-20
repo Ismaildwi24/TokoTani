@@ -18,6 +18,25 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
   const [copied, setCopied] = useState(false)
 
   const [loadingPayment, setLoadingPayment] = useState(false)
+  const [completingId, setCompletingId] = useState<string | null>(null)
+
+  const handleComplete = async (sellerId: string) => {
+    if (!confirm('Apakah Anda yakin telah menerima pesanan ini dengan baik?')) return
+    setCompletingId(sellerId)
+    try {
+      const res = await fetch(`/api/order/seller/${sellerId}/complete`, { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json()
+        alert(body.error || 'Gagal menyelesaikan pesanan')
+      } else {
+        window.location.reload()
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan jaringan')
+    } finally {
+      setCompletingId(null)
+    }
+  }
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText('1234567890')
@@ -227,6 +246,21 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                     </span>
                   </div>
                   
+                  {seller.status === 'DIKIRIM' && (
+                    <div className="mb-4 bg-blue-50 border border-blue-100 rounded-lg p-3 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                      <p className="text-sm text-blue-800">
+                        Pesanan ini sedang dalam perjalanan. Jika sudah Anda terima, mohon konfirmasi.
+                      </p>
+                      <button
+                        onClick={() => handleComplete(seller.id)}
+                        disabled={completingId === seller.id}
+                        className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {completingId === seller.id ? 'Memproses...' : 'Pesanan Diterima'}
+                      </button>
+                    </div>
+                  )}
+
                   <div className="space-y-3">
                     {seller.items.map((item: any) => (
                       <div key={item.id} className="flex items-start gap-4 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
