@@ -7,6 +7,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import RiwayatPesananCustomerClient, { CustomerOrderData } from '@/components/customer/RiwayatPesananCustomerClient'
 import CustomerHeader from '@/components/ui/CustomerHeader'
 import Footer from '@/components/ui/Footer'
+import { syncOrderPaymentStatus } from '@/lib/syncMidtrans'
 
 export const metadata: Metadata = {
   title: 'Riwayat Pesanan Saya | Toko Tani',
@@ -14,6 +15,20 @@ export const metadata: Metadata = {
 
 export default async function PesananCustomerPage() {
   const user = await requireAuth([UserRole.CUSTOMER])
+
+  // Cari order yang PENDING dan punya midtransOrderId untuk disinkronisasi
+  const pendingOrders = await prisma.order.findMany({
+    where: { 
+      customerId: user.id, 
+      paymentStatus: 'PENDING',
+      midtransOrderId: { not: null }
+    }
+  })
+
+  // Sinkronisasi status dengan Midtrans secara paralel
+  if (pendingOrders.length > 0) {
+    await Promise.all(pendingOrders.map(o => syncOrderPaymentStatus(o.id)))
+  }
 
   // Ambil semua pesanan untuk customer ini, dikelompokkan per penjual (OrderSeller)
   const orderSellers = await prisma.orderSeller.findMany({

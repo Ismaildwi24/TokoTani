@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import CustomerHeader from '@/components/ui/CustomerHeader'
 import Footer from '@/components/ui/Footer'
 import PesananDetailClient from '@/components/customer/PesananDetailClient'
+import { syncOrderPaymentStatus } from '@/lib/syncMidtrans'
 
 export const metadata = {
   title: 'Detail Pesanan | Toko Tani'
@@ -14,7 +15,7 @@ export default async function PesananDetailPage({ params }: { params: Promise<{ 
   const user = await requireAuth([UserRole.CUSTOMER])
   const { id } = await params
 
-  const order = await prisma.order.findUnique({
+  let order = await prisma.order.findUnique({
     where: {
       id,
       customerId: user.id
@@ -42,6 +43,25 @@ export default async function PesananDetailPage({ params }: { params: Promise<{ 
       }
     }
   })
+
+  if (order && order.paymentStatus === 'PENDING' && order.midtransOrderId) {
+    const syncedOrder = await syncOrderPaymentStatus(order.id)
+    if (syncedOrder && syncedOrder.paymentStatus !== 'PENDING') {
+      // Re-fetch to get updated orderSellers
+      order = await prisma.order.findUnique({
+        where: { id, customerId: user.id },
+        include: {
+          shippingAddress: true,
+          orderSellers: {
+            include: {
+              petani: { select: { farmName: true } },
+              items: { include: { product: { include: { images: { take: 1, orderBy: { sortOrder: 'asc' } } } } } }
+            }
+          }
+        }
+      })
+    }
+  }
 
   if (!order) {
     notFound()
