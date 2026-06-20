@@ -16,10 +16,15 @@ interface EditProfilClientProps {
     gender: string | null
     avatarUrl: string | null
   }
+  petaniProfile?: {
+    bankName: string | null
+    bankAccountNumber: string | null
+    bankAccountHolder: string | null
+  } | null
   returnPath?: string
 }
 
-export default function EditProfilClient({ user, returnPath }: EditProfilClientProps) {
+export default function EditProfilClient({ user, returnPath, petaniProfile }: EditProfilClientProps) {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
@@ -27,6 +32,9 @@ export default function EditProfilClient({ user, returnPath }: EditProfilClientP
     email: user.email,
     phone: user.phone || '',
     gender: user.gender || '',
+    bankName: petaniProfile?.bankName || '',
+    bankAccountNumber: petaniProfile?.bankAccountNumber || '',
+    bankAccountHolder: petaniProfile?.bankAccountHolder || '',
   })
   const [avatarPreview, setAvatarPreview] = useState(user.avatarUrl || '')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
@@ -234,6 +242,37 @@ export default function EditProfilClient({ user, returnPath }: EditProfilClientP
             </div>
 
             <div className="h-px bg-[#E7E8EC] mb-5" />
+
+            {/* Petani Financial Details */}
+            {petaniProfile !== undefined && (
+              <>
+                <div className="mb-6">
+                  <h2 className="text-xl font-extrabold text-gray-900 mb-4">Informasi Penarikan Dana</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <Input
+                      id="edit-bank-name"
+                      label="Nama Bank / E-Wallet"
+                      placeholder="e.g. BCA, Mandiri, GoPay, OVO"
+                      value={form.bankName}
+                      onChange={(e) => setForm((f) => ({ ...f, bankName: e.target.value }))}
+                    />
+                    <Input
+                      id="edit-bank-account"
+                      label="Nomor Rekening / Nomor HP"
+                      value={form.bankAccountNumber}
+                      onChange={(e) => setForm((f) => ({ ...f, bankAccountNumber: e.target.value }))}
+                    />
+                  </div>
+                  <Input
+                    id="edit-bank-holder"
+                    label="Nama Pemilik Rekening"
+                    value={form.bankAccountHolder}
+                    onChange={(e) => setForm((f) => ({ ...f, bankAccountHolder: e.target.value }))}
+                  />
+                </div>
+                <div className="h-px bg-[#E7E8EC] mb-5" />
+              </>
+            )}
 
             <div className="flex justify-end">
               <Button
