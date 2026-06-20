@@ -182,7 +182,7 @@ export default function RiwayatPesananCustomerClient({ orders }: RiwayatPesananC
                     )}
                     {order.status === 'SELESAI' && (
                       <Link
-                        href={`/pesanan/${order.orderId}`}
+                        href={`/pesanan/${order.orderId}/ulasan`}
                         className="px-4 py-2 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 rounded-xl text-sm font-bold transition-colors flex items-center gap-1"
                       >
                         <StarIcon className="w-4 h-4" /> Beri Ulasan
