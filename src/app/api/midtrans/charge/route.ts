@@ -37,9 +37,11 @@ export async function POST(request: Request) {
     }
   }
 
+  const newMidtransOrderId = `TT-${order.orderCode}-${Date.now()}`
+
   const snapToken = await midtrans.createTransaction({
     transaction_details: {
-      order_id: `TT-${order.orderCode}-${Date.now()}`,
+      order_id: newMidtransOrderId,
       gross_amount: parseFloat(order.total as unknown as string),
     },
     item_details: itemDetails,
@@ -53,7 +55,7 @@ export async function POST(request: Request) {
   // Simpan midtransOrderId
   await prisma.order.update({
     where: { id: orderId },
-    data: { midtransOrderId: `TT-${order.orderCode}-${Date.now()}` },
+    data: { midtransOrderId: newMidtransOrderId },
   })
 
   return NextResponse.json({ snapToken: snapToken.token })

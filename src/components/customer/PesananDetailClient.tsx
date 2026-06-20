@@ -38,7 +38,10 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
         // @ts-ignore
         window.snap?.pay(data.snapToken, {
           onSuccess: function() {
-            window.location.reload()
+            setLoadingPayment(true)
+            setTimeout(() => {
+              window.location.reload()
+            }, 3000)
           },
           onPending: function() {
             window.location.reload()
