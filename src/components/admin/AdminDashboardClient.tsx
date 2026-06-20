@@ -92,7 +92,8 @@ export default function AdminDashboardClient({
       <header className="bg-white border-b border-[#E7E8EC] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/admin" className="text-lg font-extrabold text-[#006E2F]">
+            <Link href="/admin" className="flex items-center gap-1.5 text-lg font-extrabold text-[#006E2F]">
+              <img src="/logo.png" alt="Logo Toko Tani" className="h-6 w-auto object-contain" />
               Toko Tani Admin
             </Link>
             <nav className="hidden sm:flex items-center gap-5">

@@ -39,8 +39,9 @@ export default function CustomerHeader({
         {/* Logo */}
         <Link
           href="/"
-          className="flex-shrink-0 text-xl font-extrabold text-[#006E2F] tracking-tight hover:opacity-80 transition-opacity"
+          className="flex-shrink-0 flex items-center gap-2 text-xl font-extrabold text-[#006E2F] tracking-tight hover:opacity-80 transition-opacity"
         >
+          <img src="/logo.png" alt="Logo Toko Tani" className="h-8 w-auto object-contain" />
           Toko Tani
         </Link>
 

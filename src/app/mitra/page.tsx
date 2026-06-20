@@ -68,7 +68,8 @@ export default async function MitraDashboardPage() {
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/mitra" className="flex items-center gap-1.5 text-lg font-extrabold text-[#006E2F]">
-              🌿 Toko Tani
+              <img src="/logo.png" alt="Logo Toko Tani" className="h-6 w-auto object-contain" />
+              Toko Tani
             </Link>
             <nav className="hidden sm:flex items-center gap-5">
               <Link href="/mitra" className="text-sm font-semibold text-[#006E2F] border-b-2 border-[#006E2F] pb-0.5">
