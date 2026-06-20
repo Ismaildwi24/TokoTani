@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BellIcon } from '@heroicons/react/24/outline'
-import { CheckCircleIcon, XCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid'
+import { CheckCircleIcon, XCircleIcon, ExclamationCircleIcon, ShoppingBagIcon, TagIcon } from '@heroicons/react/24/solid'
 
 interface Stat {
   label: string
@@ -24,7 +24,7 @@ interface FeaturedProduct {
 }
 
 interface OperasionalItem {
-  type: 'verify' | 'complaint'
+  type: 'verify' | 'complaint' | 'order' | 'product'
   title: string
   desc: string
   time: string
@@ -244,11 +244,18 @@ export default function AdminDashboardClient({
                 <div key={i} className="flex items-center gap-3 py-3.5">
                   <div
                     className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      item.type === 'verify' ? 'bg-[#E6EEFF]' : 'bg-red-50'
+                      item.type === 'verify' ? 'bg-[#E6EEFF]' : 
+                      item.type === 'order' ? 'bg-blue-50' :
+                      item.type === 'product' ? 'bg-purple-50' :
+                      'bg-red-50'
                     }`}
                   >
                     {item.type === 'verify' ? (
                       <CheckCircleIcon className="h-5 w-5 text-[#006E2F]" />
+                    ) : item.type === 'order' ? (
+                      <ShoppingBagIcon className="h-5 w-5 text-blue-500" />
+                    ) : item.type === 'product' ? (
+                      <TagIcon className="h-5 w-5 text-purple-500" />
                     ) : (
                       <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
                     )}

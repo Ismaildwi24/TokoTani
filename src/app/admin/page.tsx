@@ -26,6 +26,8 @@ export default async function AdminDashboardPage() {
     recentNotifs,
     recentReports,
     commissionSetting,
+    recentOrders,
+    recentProducts,
   ] = await Promise.all([
     // Total transaksi hari ini
     prisma.order.aggregate({
@@ -61,6 +63,18 @@ export default async function AdminDashboardPage() {
     }),
     // Commission setting
     prisma.platformSetting.findUnique({ where: { key: 'commission_percentage' } }),
+    // Pesanan terbaru
+    prisma.order.findMany({
+      include: { customer: { select: { fullName: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+    }),
+    // Produk terbaru
+    prisma.product.findMany({
+      include: { petani: { select: { farmName: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+    }),
   ])
 
   const txAmount = txToday._sum.total ? parseFloat(txToday._sum.total as unknown as string) : 0
@@ -102,6 +116,7 @@ export default async function AdminDashboardPage() {
       desc: `${p.user.fullName}`,
       time: new Date(p.user.createdAt!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
       id: p.userId,
+      createdAt: p.user.createdAt!,
     })),
     ...recentReports.map((r) => ({
       type: 'complaint' as const,
@@ -109,8 +124,25 @@ export default async function AdminDashboardPage() {
       desc: r.reason,
       time: new Date(r.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
       id: r.id,
+      createdAt: r.createdAt,
     })),
-  ].sort((a, b) => b.time.localeCompare(a.time)).slice(0, 5)
+    ...recentOrders.map((o) => ({
+      type: 'order' as const,
+      title: `Pesanan Baru: ${o.orderCode}`,
+      desc: o.customer.fullName,
+      time: new Date(o.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      id: o.id,
+      createdAt: o.createdAt,
+    })),
+    ...recentProducts.map((p) => ({
+      type: 'product' as const,
+      title: `Produk Baru: ${p.name}`,
+      desc: p.petani.farmName,
+      time: new Date(p.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      id: p.id,
+      createdAt: p.createdAt,
+    })),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 5)
 
   return (
     <AdminDashboardClient
