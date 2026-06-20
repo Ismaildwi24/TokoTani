@@ -63,6 +63,26 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
     }
   }
 
+  const [canceling, setCanceling] = useState(false)
+  const handleCancel = async () => {
+    if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) return
+    
+    setCanceling(true)
+    try {
+      const res = await fetch(`/api/order/${order.id}/cancel`, { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json()
+        alert(body.error || 'Gagal membatalkan pesanan')
+      } else {
+        window.location.reload()
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan jaringan')
+    } finally {
+      setCanceling(false)
+    }
+  }
+
   const isPendingManual = order.paymentStatus === 'PENDING' && order.paymentMethod === 'MANUAL_TRANSFER'
   const isPendingMidtrans = order.paymentStatus === 'PENDING' && order.paymentMethod === 'MIDTRANS'
 
@@ -130,12 +150,19 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                 </div>
               </div>
 
-              <div className="text-center">
+              <div className="text-center flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
                 <button 
                   onClick={() => alert('Fitur verifikasi pembayaran manual sedang dalam pengembangan.')}
                   className="w-full sm:w-auto px-8 py-3 bg-[#006E2F] text-white font-bold rounded-full hover:bg-[#005525] transition-colors active:scale-95 shadow-md"
                 >
                   Saya Sudah Transfer
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={canceling}
+                  className="w-full sm:w-auto px-8 py-3 bg-red-50 text-red-600 font-bold rounded-full hover:bg-red-100 transition-colors active:scale-95 shadow-sm disabled:opacity-50"
+                >
+                  {canceling ? 'Memproses...' : 'Batalkan Pesanan'}
                 </button>
               </div>
             </div>
@@ -155,16 +182,23 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                 </div>
               </div>
 
-              <div className="text-center">
+              <div className="text-center flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
                 <button 
                   onClick={handleMidtransPayment}
-                  disabled={loadingPayment}
-                  className="w-full sm:w-auto px-8 py-3 bg-[#006E2F] text-white font-bold rounded-full hover:bg-[#005525] transition-colors active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto gap-2"
+                  disabled={loadingPayment || canceling}
+                  className="w-full sm:w-auto px-8 py-3 bg-[#006E2F] text-white font-bold rounded-full hover:bg-[#005525] transition-colors active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loadingPayment ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : null}
                   {loadingPayment ? 'Memuat...' : 'Bayar via Midtrans'}
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={canceling || loadingPayment}
+                  className="w-full sm:w-auto px-8 py-3 bg-red-50 text-red-600 font-bold rounded-full hover:bg-red-100 transition-colors active:scale-95 shadow-sm disabled:opacity-50"
+                >
+                  {canceling ? 'Memproses...' : 'Batalkan Pesanan'}
                 </button>
               </div>
             </div>

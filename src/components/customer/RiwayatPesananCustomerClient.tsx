@@ -51,6 +51,27 @@ export default function RiwayatPesananCustomerClient({ orders }: RiwayatPesananC
     }
   }, [initialStatus])
 
+  const [cancelingId, setCancelingId] = useState<string | null>(null)
+
+  const handleCancel = async (orderId: string) => {
+    if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) return
+    
+    setCancelingId(orderId)
+    try {
+      const res = await fetch(`/api/order/${orderId}/cancel`, { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json()
+        alert(body.error || 'Gagal membatalkan pesanan')
+      } else {
+        window.location.reload()
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan jaringan')
+    } finally {
+      setCancelingId(null)
+    }
+  }
+
   const filteredOrders = orders.filter((order) => {
     if (activeTab === 'SEMUA') return true
     return order.status === activeTab
@@ -143,12 +164,21 @@ export default function RiwayatPesananCustomerClient({ orders }: RiwayatPesananC
                   </div>
                   <div className="flex items-center gap-2">
                     {order.status === 'MENUNGGU_PEMBAYARAN' && (
-                      <Link
-                        href={`/pesanan/${order.orderId}`}
-                        className="px-4 py-2 bg-orange-100 text-orange-700 hover:bg-orange-200 rounded-xl text-sm font-bold transition-colors"
-                      >
-                        Bayar Sekarang
-                      </Link>
+                      <>
+                        <button
+                          onClick={() => handleCancel(order.orderId)}
+                          disabled={cancelingId === order.orderId}
+                          className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
+                        >
+                          {cancelingId === order.orderId ? 'Memproses...' : 'Batalkan Pesanan'}
+                        </button>
+                        <Link
+                          href={`/pesanan/${order.orderId}`}
+                          className="px-4 py-2 bg-orange-100 text-orange-700 hover:bg-orange-200 rounded-xl text-sm font-bold transition-colors"
+                        >
+                          Bayar Sekarang
+                        </Link>
+                      </>
                     )}
                     {order.status === 'SELESAI' && (
                       <Link
