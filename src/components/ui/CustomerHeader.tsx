@@ -70,19 +70,6 @@ export default function CustomerHeader({
             <ChatBubbleOvalLeftEllipsisIcon className="h-5 w-5" />
           </Link>
 
-          {/* Notif */}
-          <Link
-            href="/notifikasi"
-            id="header-notif-btn"
-            className="relative p-2 text-gray-600 hover:text-[#006E2F] hover:bg-[#E6EEFF] rounded-full transition-all"
-          >
-            <BellIcon className="h-5 w-5" />
-            {notifCount > 0 && (
-              <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                {notifCount > 9 ? '9+' : notifCount}
-              </span>
-            )}
-          </Link>
 
           {/* Cart */}
           <Link
