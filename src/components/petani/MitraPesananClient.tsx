@@ -18,9 +18,7 @@ function formatRupiah(amount: number | string) {
 }
 
 const COURIERS = [
-  { name: 'Lalamove', eta: 'Estimasi 15-30 mnt', price: 12000 },
-  { name: 'ACI', eta: 'Estimasi 20-40 mnt', price: 10000 },
-  { name: 'Gojek', eta: 'Estimasi 10-25 mnt', price: 15000 },
+  { name: 'Pengiriman Manual', eta: 'Diantar langsung oleh Petani', price: 0 },
 ]
 
 interface OrderSellerData {
