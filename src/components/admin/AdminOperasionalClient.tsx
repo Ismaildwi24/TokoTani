@@ -61,15 +61,26 @@ export default function AdminOperasionalClient({ pendingOrders: initialOrders, u
   })
 
   async function verifyPayment(orderId: string, approve: boolean) {
+    let reason = ''
+    if (!approve) {
+      const input = prompt('Alasan penolakan bukti pembayaran:')
+      if (input === null) return // Canceled
+      if (!input.trim()) return alert('Alasan penolakan wajib diisi.')
+      reason = input.trim()
+    }
+
     setProcessingId(orderId)
     try {
       const res = await fetch(`/api/admin/order/${orderId}/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approve }),
+        body: JSON.stringify({ approve, reason }),
       })
       if (res.ok) {
         setOrders((prev) => prev.filter((o) => o.id !== orderId))
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Gagal memverifikasi')
       }
     } finally {
       setProcessingId(null)

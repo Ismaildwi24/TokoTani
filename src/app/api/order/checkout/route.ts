@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { itemIds, paymentMethod } = await request.json()
+  const { itemIds, paymentMethod, paymentChannel } = await request.json()
   if (!itemIds?.length || !paymentMethod) {
     return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 })
   }
@@ -67,6 +67,7 @@ export async function POST(request: Request) {
         customerId: user.id,
         shippingAddressId: defaultAddress.id,
         paymentMethod: paymentMethod as PaymentMethod,
+        midtransPaymentType: paymentChannel,
         paymentStatus: PaymentStatus.PENDING,
         subtotal,
         totalShippingCost: 0,

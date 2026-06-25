@@ -32,17 +32,15 @@ interface CartItemData {
 }
 
 const PAYMENT_OPTIONS = [
-  { id: 'BCA', label: 'Transfer BCA', icon: 'bank' },
-  { id: 'BRI', label: 'Transfer BRI', icon: 'bank' },
-  { id: 'MANDIRI', label: 'Transfer Mandiri', icon: 'bank' },
-  { id: 'BNI', label: 'Transfer BNI', icon: 'bank' },
-  { id: 'QRIS', label: 'QRIS', icon: 'qr' },
+  { id: 'MANUAL_BANK', label: 'Transfer Manual', icon: 'bank' },
+  { id: 'MANUAL_QRIS', label: 'QRIS', icon: 'qr' },
+  { id: 'MIDTRANS_VA', label: 'Virtual Account (Otomatis)', icon: 'bank' },
 ]
 
 export default function KeranjangClient({ items: initialItems }: { items: CartItemData[] }) {
   const router = useRouter()
   const [items, setItems] = useState<CartItemData[]>(initialItems)
-  const [paymentMethod, setPaymentMethod] = useState('BCA')
+  const [paymentMethod, setPaymentMethod] = useState('MANUAL_BANK')
   const [checkingOut, setCheckingOut] = useState(false)
 
   const selectedItems = useMemo(() => items.filter((i) => i.selected), [items])
@@ -90,12 +88,16 @@ export default function KeranjangClient({ items: initialItems }: { items: CartIt
     if (selectedItems.length === 0) return
     setCheckingOut(true)
     try {
+      const isMidtrans = paymentMethod === 'MIDTRANS_VA'
+      const payloadMethod = isMidtrans ? 'MIDTRANS' : 'MANUAL_TRANSFER'
+      
       const res = await fetch('/api/order/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           itemIds: selectedItems.map((i) => i.id),
-          paymentMethod: paymentMethod === 'QRIS' ? 'MIDTRANS' : 'MANUAL_TRANSFER',
+          paymentMethod: payloadMethod,
+          paymentChannel: paymentMethod, // 'MANUAL_BANK', 'MANUAL_QRIS', or 'MIDTRANS_VA'
         }),
       })
       const data = await res.json()
