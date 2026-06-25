@@ -56,19 +56,19 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
       if (res.ok && data.snapToken) {
         // @ts-ignore
         window.snap?.pay(data.snapToken, {
-          onSuccess: function() {
+          onSuccess: function () {
             setLoadingPayment(true)
             setTimeout(() => {
               window.location.reload()
             }, 3000)
           },
-          onPending: function() {
+          onPending: function () {
             window.location.reload()
           },
-          onError: function() {
+          onError: function () {
             window.location.reload()
           },
-          onClose: function() {
+          onClose: function () {
             // Do nothing, let user stay on this page
           }
         })
@@ -85,7 +85,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
   const [canceling, setCanceling] = useState(false)
   const handleCancel = async () => {
     if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) return
-    
+
     setCanceling(true)
     try {
       const res = await fetch(`/api/order/${order.id}/cancel`, { method: 'POST' })
@@ -116,7 +116,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
       const formData = new FormData()
       formData.append('file', proofFile)
       formData.append('bucket', 'order-proofs')
-      
+
       const uploadRes = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -132,7 +132,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
         body: JSON.stringify({ proofUrl }),
       })
       if (!res.ok) throw new Error('Gagal menyimpan bukti pembayaran')
-      
+
       alert('Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.')
       window.location.reload()
     } catch (err: any) {
@@ -154,12 +154,11 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
           <h1 className="text-2xl font-extrabold text-gray-900">Detail Pesanan</h1>
           <p className="text-sm text-[#8F9093] mt-1">Order ID: <span className="font-semibold text-gray-900">{order.orderCode}</span></p>
         </div>
-        <div className={`px-4 py-1.5 rounded-full text-sm font-bold ${
-          order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
-          order.paymentStatus === 'PENDING' ? 'bg-orange-100 text-orange-700' :
-          order.paymentStatus === 'FAILED' ? 'bg-red-100 text-red-700' :
-          'bg-gray-100 text-gray-700'
-        }`}>
+        <div className={`px-4 py-1.5 rounded-full text-sm font-bold ${order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
+            order.paymentStatus === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+              order.paymentStatus === 'FAILED' ? 'bg-red-100 text-red-700' :
+                'bg-gray-100 text-gray-700'
+          }`}>
           {order.paymentStatus === 'PAID' ? 'LUNAS' : order.paymentStatus === 'PENDING' ? (order.manualProofUrl ? 'MENUNGGU VERIFIKASI' : 'MENUNGGU PEMBAYARAN') : 'DIBATALKAN'}
         </div>
       </div>
@@ -172,11 +171,11 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
               <div className="absolute top-0 left-0 w-full h-2 bg-orange-400" />
               <h2 className="text-lg font-extrabold text-gray-900 mb-2">Selesaikan Pembayaran Anda</h2>
               <p className="text-sm text-gray-600 mb-6">
-                {isQris 
-                  ? "Silakan scan kode QRIS di bawah ini dengan aplikasi pembayaran Anda (Gopay, OVO, Dana, M-Banking)." 
+                {isQris
+                  ? "Silakan scan kode QRIS di bawah ini dengan aplikasi pembayaran Anda (Gopay, OVO, Dana, M-Banking)."
                   : "Silakan transfer tepat sesuai nominal berikut ke rekening bank di bawah ini untuk mempercepat proses verifikasi."}
               </p>
-              
+
               <div className="flex flex-col md:flex-row items-center justify-between bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6 gap-4">
                 <div className="text-center md:text-left">
                   <p className="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wider">Total Tagihan</p>
@@ -206,10 +205,10 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                       <p className="text-xs text-gray-500">a.n. Ismail dwi muh anugrah</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                     <span className="text-lg font-mono font-bold tracking-widest text-gray-900">1858105579</span>
-                    <button 
+                    <button
                       onClick={copyToClipboard}
                       className="flex items-center gap-1.5 text-sm font-semibold text-[#006E2F] hover:text-[#005525] transition-colors"
                     >
@@ -223,15 +222,15 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
               <div className="border border-gray-200 rounded-xl p-5 mb-6 bg-gray-50">
                 <h3 className="font-bold text-gray-900 mb-3">Unggah Bukti Pembayaran</h3>
                 <p className="text-sm text-gray-600 mb-4">Setelah transfer, mohon unggah foto struk atau screenshot bukti pembayaran Anda di sini agar pesanan segera diproses.</p>
-                
-                <input 
-                  type="file" 
+
+                <input
+                  type="file"
                   accept="image/jpeg, image/png"
                   onChange={(e) => setProofFile(e.target.files?.[0] || null)}
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#006E2F]/10 file:text-[#006E2F] hover:file:bg-[#006E2F]/20 mb-4"
                 />
 
-                <button 
+                <button
                   onClick={handleUploadProof}
                   disabled={uploading || !proofFile}
                   className="w-full px-8 py-3 bg-[#006E2F] text-white font-bold rounded-full hover:bg-[#005525] transition-colors active:scale-95 shadow-md disabled:opacity-50"
@@ -258,7 +257,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
               <div className="absolute top-0 left-0 w-full h-2 bg-blue-500" />
               <h2 className="text-lg font-extrabold text-gray-900 mb-2">Menunggu Verifikasi Admin</h2>
               <p className="text-sm text-gray-600 mb-4">Bukti pembayaran Anda sudah kami terima dan sedang dalam proses pengecekan oleh Admin.</p>
-              
+
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex justify-center mb-4">
                 <img src={order.manualProofUrl} alt="Bukti Pembayaran" className="max-h-64 object-contain rounded" />
               </div>
@@ -271,7 +270,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
               <div className="absolute top-0 left-0 w-full h-2 bg-orange-400" />
               <h2 className="text-lg font-extrabold text-gray-900 mb-2">Selesaikan Pembayaran Anda</h2>
               <p className="text-sm text-gray-600 mb-6">Silakan klik tombol di bawah ini untuk melanjutkan pembayaran via Payment Gateway (QRIS, GoPay, Virtual Account, dll).</p>
-              
+
               <div className="flex flex-col md:flex-row items-center justify-between bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6 gap-4">
                 <div className="text-center md:text-left">
                   <p className="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wider">Total Tagihan</p>
@@ -280,7 +279,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
               </div>
 
               <div className="text-center flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
-                <button 
+                <button
                   onClick={handleMidtransPayment}
                   disabled={loadingPayment || canceling}
                   className="w-full sm:w-auto px-8 py-3 bg-[#006E2F] text-white font-bold rounded-full hover:bg-[#005525] transition-colors active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -304,7 +303,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
           {/* Daftar Produk */}
           <div className="bg-white rounded-2xl border border-[#E7E8EC] shadow-sm p-6">
             <h2 className="text-lg font-extrabold text-gray-900 mb-4">Daftar Produk</h2>
-            
+
             <div className="space-y-6">
               {order.orderSellers.map((seller: any) => (
                 <div key={seller.id} className="border border-gray-100 rounded-xl p-4 bg-gray-50/50">
@@ -313,17 +312,16 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                       {seller.petani.farmName.charAt(0).toUpperCase()}
                     </div>
                     <span className="font-semibold text-sm text-gray-900">{seller.petani.farmName}</span>
-                    <span className={`ml-auto text-xs font-bold px-2.5 py-1 rounded-full ${
-                      seller.status === 'MENUNGGU_PEMBAYARAN' ? 'bg-orange-100 text-orange-600' :
-                      seller.status === 'DIPROSES' ? 'bg-blue-100 text-blue-600' :
-                      seller.status === 'DIKIRIM' ? 'bg-indigo-100 text-indigo-600' :
-                      seller.status === 'SELESAI' ? 'bg-green-100 text-green-600' :
-                      'bg-red-100 text-red-600'
-                    }`}>
+                    <span className={`ml-auto text-xs font-bold px-2.5 py-1 rounded-full ${seller.status === 'MENUNGGU_PEMBAYARAN' ? 'bg-orange-100 text-orange-600' :
+                        seller.status === 'DIPROSES' ? 'bg-blue-100 text-blue-600' :
+                          seller.status === 'DIKIRIM' ? 'bg-indigo-100 text-indigo-600' :
+                            seller.status === 'SELESAI' ? 'bg-green-100 text-green-600' :
+                              'bg-red-100 text-red-600'
+                      }`}>
                       {seller.status.replace('_', ' ')}
                     </span>
                   </div>
-                  
+
                   {seller.status === 'DIKIRIM' && (
                     <div className="mb-4 bg-blue-50 border border-blue-100 rounded-lg p-3 flex flex-col sm:flex-row gap-3 items-center justify-between">
                       <p className="text-sm text-blue-800">
@@ -342,8 +340,8 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                   <div className="space-y-3">
                     {seller.items.map((item: any) => (
                       <div key={item.id} className="flex items-start gap-4 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                        <img 
-                          src={item.product?.images?.[0]?.url || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=200&q=80'} 
+                        <img
+                          src={item.product?.images?.[0]?.url || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=200&q=80'}
                           alt={item.productNameSnapshot}
                           className="w-16 h-16 rounded-md object-cover border border-gray-100"
                         />
@@ -357,7 +355,7 @@ export default function PesananDetailClient({ order }: OrderDetailProps) {
                       </div>
                     ))}
                   </div>
-                  
+
                   {/* Ongkir per seller (jika ada) */}
                   {parseFloat(seller.shippingCost) > 0 && (
                     <div className="mt-3 flex justify-between items-center text-sm px-1">
